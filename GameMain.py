@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, csv
 import pygame
 
 from Agent import Agent
@@ -14,6 +14,24 @@ class GameMain:
         self.FPS = 30
         self.fpsClock = pygame.time.Clock()
         self.background = BackgroundMap()
+	self.knights = []
+	self.houses = []
+	with open('config/knights.csv') as knights_file:
+    	    knights = csv.DictReader(knights_file)
+	    for knight in knights:
+		self.knights.append(knight)
+	with open('config/houses.csv') as houses_file:
+    	    houses = csv.DictReader(houses_file)
+	    for house in houses:
+		self.houses.append(house)
+  
+  	''' DEBUG 
+	for knight in self.knights:
+	    print knight['name'],knight['lives'],knight['cosmic-power']
+	for house in self.houses:
+	    print house['sign'],house['difficulty'],house['number']
+	    DEBUG'''
+    
 
     def MainLoop(self):
         pygame.key.set_repeat(100, 100)
