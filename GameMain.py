@@ -3,6 +3,7 @@ import pygame
 
 from Agent import Agent
 from BackgroundMap import BackgroundMap
+from Astar import Astar
 
 class GameMain:
 
@@ -40,6 +41,8 @@ class GameMain:
         #self.agentSprites.draw(self.screen)
         pygame.display.flip()
         self.agent.render(self.screen)
+        returnedValue = Astar.path_search(self.background.mapMatrix, self.background.startCoordenate, self.background.endCoordenate)
+        print returnedValue
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

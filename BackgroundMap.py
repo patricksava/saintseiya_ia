@@ -19,7 +19,10 @@ class BackgroundMap:
                 self.mapMatrix[i][j] = line[j]
                 if(line[j] == 'I'):
                     self.startPoint = (i * self.COORD_HEIGHT, j* self.COORD_WIDTH)
-                    self.startCoordenate = (i, j)
+                    self.startCoordenate = [i, j]
+                if(line[j] == 'O'):
+                    self.endPoint = (i * self.COORD_HEIGHT, j* self.COORD_WIDTH)
+                    self.endCoordenate = [i, j]
 
         self.surface = self.prepareSurface()
 
