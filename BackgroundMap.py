@@ -16,13 +16,13 @@ class BackgroundMap:
         for i in range(42):
             line = mapfile.readline()
             for j in range(42):
-                self.mapMatrix[i][j] = line[j]
+                self.mapMatrix[j][i] = line[j]
                 if(line[j] == 'I'):
-                    self.startPoint = (i * self.COORD_HEIGHT, j* self.COORD_WIDTH)
-                    self.startCoordenate = [i, j]
+                    self.startPoint = (j * self.COORD_HEIGHT, i* self.COORD_WIDTH)
+                    self.startCoordenate = [j, i]
                 if(line[j] == 'O'):
-                    self.endPoint = (i * self.COORD_HEIGHT, j* self.COORD_WIDTH)
-                    self.endCoordenate = [i, j]
+                    self.endPoint = (j * self.COORD_HEIGHT, i* self.COORD_WIDTH)
+                    self.endCoordenate = [j, i]
 
         self.surface = self.prepareSurface()
 
@@ -31,8 +31,8 @@ class BackgroundMap:
         # prepare map
         for i in range(42):
             for j in range(42):
-                rect = ((j*self.COORD_HEIGHT, i*self.COORD_WIDTH), (self.COORD_HEIGHT, self.COORD_WIDTH))
-                pygame.draw.rect(surface, self.getColor(i, j), rect)
+                rect = ((i*self.COORD_HEIGHT, j*self.COORD_WIDTH), (self.COORD_HEIGHT, self.COORD_WIDTH))
+                pygame.draw.rect(surface, self.getColor(j, i), rect)
 
         return surface
 
@@ -41,7 +41,7 @@ class BackgroundMap:
 
 
     def getColor(self, x, y):
-        terrain = self.mapMatrix[x][y]
+        terrain = self.mapMatrix[y][x]
         if(terrain == '_'):
             return MapColors.MONTAIN
         elif(terrain == 'R'):

@@ -21,20 +21,20 @@ class Agent(pygame.sprite.Sprite):
         surface.blit(self.image, (self.xSurf, self.ySurf))
 
     def move(self, key, surface):
-        if(key == K_RIGHT):
+        if(key == 'D'):
             self.xSurf += self.rect.width
             self.x = self.x + 1
-        elif(key == K_LEFT):
+        elif(key == 'E'):
             self.xSurf -= self.rect.width
             self.x = self.x - 1
-        elif(key == K_UP):
+        elif(key == 'N'):
             self.ySurf -= self.rect.height
             self.y = self.y - 1
-        elif(key == K_DOWN):
+        elif(key == 'S'):
             self.ySurf += self.rect.height
             self.y = self.y + 1
 
-        if(self.xSurf > surface.get_width()):
+        if(self.xSurf >= surface.get_width()):
             self.xSurf -= self.rect.width
             self.x = self.x - 1
         elif(self.xSurf < 0):
@@ -43,7 +43,7 @@ class Agent(pygame.sprite.Sprite):
         elif(self.ySurf < 0):
             self.ySurf += self.rect.height
             self.y = self.y + 1
-        elif(self.ySurf > surface.get_height()):
+        elif(self.ySurf >= surface.get_height()):
             self.ySurf -= self.rect.height
             self.y = self.y - 1
 

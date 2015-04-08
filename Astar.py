@@ -2,67 +2,94 @@ import heapq
 
 class Astar:
 
+    class Node:
+        def __init__(self, tuple):
+            self.cost = tuple[0]
+            self.position = tuple[1]
+            self.parent = tuple[2]
+            self.direction = tuple[3]
+
+        def node_key(self):
+            return str(self.position[0]) + '-' + str(self.position[1])
+
+        def possible_moves( self, matrix ):
+            i = len(matrix)
+            j = len(matrix[0])
+            moves = []
+
+            # NORTE
+            if(self.position[1] > 0):
+                new_position = [self.position[0], self.position[1] - 1]
+                moves.append([self.move_cost(matrix, new_position), new_position, self, 'N'])
+
+            # SUL
+            if(self.position[1] < j-1):
+                new_position = [self.position[0], self.position[1] + 1]
+                moves.append([self.move_cost(matrix, new_position), new_position, self, 'S'])
+
+            # ESQUERDA
+            if(self.position[0] > 0):
+                new_position = [self.position[0] - 1, self.position[1]]
+                moves.append([self.move_cost(matrix, new_position), new_position, self, 'E'])
+
+            # DIREITA
+            if(self.position[1] < i-1):
+                new_position = [self.position[0] + 1, self.position[1]]
+                moves.append([self.move_cost(matrix, new_position), new_position, self, 'D'])
+
+            return moves
+
+        def move_cost(self, matrix, position):
+            terrain = matrix[position[0]][position[1]]
+            if(terrain == '_'):
+                return 200
+            if(terrain == 'P'):
+                return 1
+            if(terrain == 'R'):
+                return 5
+
+            return 1
+
+        def to_tuple(self):
+            return [self.cost, self.position, self.parent, self.direction]
+
     @staticmethod
     def path_heuristic(goal, current):
 		return ((current[0] - goal[0])**2 + (current[1] - goal[1])**2)**0.5
 
-    @staticmethod
-    def possible_moves( matrix, position ):
-        i = len(matrix)
-        j = len(matrix[0])
-        moves = []
-
-        # NORTE
-        if(position[1] > 0):
-            new_position = [position[0], position[1] - 1]
-            moves.append({'cost':Astar.move_cost(matrix, new_position), 'position': new_position, 'direction':'N', 'parent':position})
-
-        # SUL
-        if(position[1] < j-1):
-            new_position = [position[0], position[1] + 1]
-            moves.append({'cost':Astar.move_cost(matrix, new_position), 'position': new_position, 'direction':'S', 'parent':position})
-
-        # ESQUERDA
-        if(position[0] > 0):
-            new_position = [position[0] - 1, position[1]]
-            moves.append({'cost':Astar.move_cost(matrix, new_position), 'position': new_position, 'direction':'E', 'parent':position})
-
-        # DIREITA
-        if(position[1] < i-1):
-            new_position = [position[0] + 1, position[1]]
-            moves.append({'cost':Astar.move_cost(matrix, new_position), 'position': new_position, 'direction':'D', 'parent':position})
-
-        return moves
-
-    @staticmethod
-    def move_key( move ):
-        ind1 = move['position'][0]
-        ind2 = move['position'][1]
-        print str(ind1) + '-' + str(ind2)
-        return str(ind1) + '-' + str(ind2)
 
     @staticmethod
     def path_search( matrix, start, goal ):
         heap = [] #Priority min heap to keep the positions to be expanded
         visited = {} #Nodes that have already been visited
 
-        heapq.heappush(heap, {'cost':0, 'position':start, 'parent':None}) # Includes start point as first node in the heap
+        heapq.heappush(heap, [0, start, None, '']) # Includes start point as first node in the heap
 
         while len(heap) > 0:
-            current = heapq.heappop(heap) # Removes the best node front he expansion edge
-            if current['position'] == goal:
-                print "We have a f***ing winner!"
-                break
-            nodeName = Astar.move_key(current)
-            visited[nodeName] = current # Sets node as visited
-            for nextMove in Astar.possible_moves(matrix, current['position']):
-                cost = Astar.path_heuristic(goal, nextMove['position']) + nextMove['cost'] #Calculates the cost + heuristic of the new node
-                if Astar.move_key(nextMove) in visited and cost < visited[Astar.move_key(nextMove)]['cost']:
-                    del visited[Astar.move_key(nextMove)]
+            current = Astar.Node(heapq.heappop(heap)) # Removes the best node front he expansion frontier
+            if current.position == goal:
 
-                if Astar.move_key(nextMove) not in visited:
-                    nextMove['cost'] = cost
-                    heapq.heappush(heap, nextMove)
+                print "We have a f***ing winner!"
+                n = current
+                listSteps = []
+                while n.parent != None: # Create a list of steps from last to first
+                    listSteps.append(n.direction)
+                    n = n.parent
+
+                listSteps.reverse() # Reverse steps so that we get the directions from start to goal
+                return listSteps
+
+            visited[current.node_key()] = current # Sets node as visited
+            for nextMove in current.possible_moves(matrix): # For each possible move
+                nextMove = Astar.Node(nextMove)
+                cost = Astar.path_heuristic(goal, nextMove.position) + nextMove.cost # Calculates the cost + heuristic of the new node
+                if nextMove.node_key() in visited and cost < visited[nextMove.node_key()].cost:
+                    del visited[nextMove.node_key()]
+
+                if nextMove.node_key() not in visited:
+                    nextMove.cost = cost
+                    heapq.heappush(heap, nextMove.to_tuple()) # Puts node in the expansion frontier heap
+
 
 
 
@@ -99,15 +126,4 @@ class Astar:
         return [came_from, cost_so_far]
 '''
 
-    @staticmethod
-    def move_cost(matrix, position):
-        terrain = matrix[position[0]][position[1]]
-        if(terrain == '_'):
-            return 200
-        if(terrain == 'P'):
-            return 1
-        if(terrain == 'R'):
-            return 5
-
-        return 1
 

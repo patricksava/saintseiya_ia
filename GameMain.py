@@ -1,4 +1,4 @@
-import os, sys, csv
+import os, sys, csv, time
 import pygame
 
 from Agent import Agent
@@ -43,6 +43,7 @@ class GameMain:
         self.agent.render(self.screen)
         returnedValue = Astar.path_search(self.background.mapMatrix, self.background.startCoordenate, self.background.endCoordenate)
         print returnedValue
+        '''
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -52,9 +53,14 @@ class GameMain:
                         event.key == pygame.K_UP or event.key == pygame.K_DOWN):
                         self.background.render(self.screen)
                         self.agent.move(event.key, self.screen)
-
+        '''
+        #self.background.debugMatrix()
+        for step in returnedValue:
+            self.background.render(self.screen)
+            self.agent.move(step, self.screen)
             pygame.display.update()
             self.fpsClock.tick(self.FPS)
+            time.sleep(0.2)
 
 
     def LoadSprites(self):
