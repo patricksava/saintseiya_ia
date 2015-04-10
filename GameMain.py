@@ -1,4 +1,4 @@
-import os, sys, csv, time
+import os, sys, csv, time, thread
 import pygame
 
 from Agent import Agent
@@ -41,27 +41,34 @@ class GameMain:
         #self.agentSprites.draw(self.screen)
         pygame.display.flip()
         self.agent.render(self.screen)
-        returnedValue = Astar.path_search(self.background.mapMatrix, self.background.startCoordenate, self.background.endCoordenate)
-        print returnedValue
-        '''
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    if (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT or
-                        event.key == pygame.K_UP or event.key == pygame.K_DOWN):
-                        self.background.render(self.screen)
-                        self.agent.move(event.key, self.screen)
-        '''
-        #self.background.debugMatrix()
-        for step in returnedValue:
-            self.background.render(self.screen)
-            self.agent.move(step, self.screen)
-            pygame.display.update()
-            self.fpsClock.tick(self.FPS)
-            time.sleep(0.2)
+                elif event.type == pygame.KEYUP and event.key == pygame.K_p:
+                    thread.start_new_thread ( self.startPathFinding, ("Thread-1", self) )
+                    #if (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT or
+                    #    event.key == pygame.K_UP or event.key == pygame.K_DOWN):
+                    #    self.background.render(self.screen)
+                    #    self.agent.move(event.key, self.screen)
 
+            #self.background.debugMatrix()
+
+    @staticmethod
+    def startPathFinding(threadName, game):
+        accCost = 0
+        returnedValue = Astar.path_search(game.background.mapMatrix, game.background.startCoordenate, game.background.endCoordenate)
+        print returnedValue
+        for step in returnedValue:
+            accCost = accCost + game.background.getTerrainCost(game.agent.y, game.agent.x)
+            game.background.render(game.screen)
+            game.agent.move(step, game.screen)
+            pygame.display.update()
+            game.fpsClock.tick(game.FPS)
+            time.sleep(0.1)
+
+        print "AccCost: " + str(accCost)
 
     def LoadSprites(self):
         self.agent = Agent(self.background.startCoordenate, self.background.startPoint)

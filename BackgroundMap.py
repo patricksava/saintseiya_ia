@@ -32,7 +32,7 @@ class BackgroundMap:
         for i in range(42):
             for j in range(42):
                 rect = ((i*self.COORD_HEIGHT, j*self.COORD_WIDTH), (self.COORD_HEIGHT, self.COORD_WIDTH))
-                pygame.draw.rect(surface, self.getColor(j, i), rect)
+                surface.blit(self.getTerrain(j, i), (i*self.COORD_HEIGHT, j*self.COORD_WIDTH))
 
         return surface
 
@@ -40,32 +40,47 @@ class BackgroundMap:
         screen.blit(self.surface, (0, 0))
 
 
-    def getColor(self, x, y):
+    def getTerrain(self, x, y):
         terrain = self.mapMatrix[y][x]
+        terrainImage = None
         if(terrain == '_'):
-            return MapColors.MONTAIN
+            terrainImage = MapColors.MOUNTAIN
         elif(terrain == 'R'):
-            return MapColors.ROCKY
+            terrainImage = MapColors.ROCKY
         elif(terrain == 'P'):
-            return MapColors.PLAIN
+            terrainImage = MapColors.PLAIN
         elif(terrain == 'I'):
-            return MapColors.START
+            terrainImage = MapColors.START
         elif(terrain == 'O'):
-            return MapColors.OBJECTIVE
+            terrainImage = MapColors.OBJECTIVE
         else:
-            return MapColors.SANCTUARY
+            terrainImage = MapColors.SANCTUARY
 
+        rect = pygame.Rect(0, 0, terrainImage.get_width(), terrainImage.get_height())
+        image = pygame.Surface(rect.size).convert()
+        image.blit(terrainImage, (0,0))
+        return image
 
 
     def debugMatrix(self):
         for i in range(42):
             print self.mapMatrix[i]
 
+    def getTerrainCost(self, x, y):
+        terrain = self.mapMatrix[y][x]
+        if(terrain == '_'):
+            return 200
+        if(terrain == 'P'):
+            return 1
+        if(terrain == 'R'):
+            return 5
+
+        return 1
 
 class MapColors:
-    MONTAIN = (0,0,0)
-    ROCKY = (125, 125, 125)
-    PLAIN = (200, 200, 200)
-    START = (255, 0, 0)
-    OBJECTIVE = (0, 255, 0)
-    SANCTUARY = (255, 255, 0)
+    MOUNTAIN = pygame.image.load('images/mountain_path.jpg')
+    ROCKY = pygame.image.load('images/rock_path.jpg')
+    PLAIN = pygame.image.load('images/plain_path.jpg')
+    START = pygame.image.load('images/start_point.jpg')#(255, 0, 0)
+    OBJECTIVE = pygame.image.load('images/end_point.jpg')#(0, 255, 0)
+    SANCTUARY = pygame.image.load('images/sanctuary.jpg')#(255, 255, 0)

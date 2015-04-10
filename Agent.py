@@ -22,15 +22,19 @@ class Agent(pygame.sprite.Sprite):
 
     def move(self, key, surface):
         if(key == 'D'):
+            self.sheet = pygame.image.load('images/seiya_right_small.png')
             self.xSurf += self.rect.width
             self.x = self.x + 1
         elif(key == 'E'):
+            self.sheet = pygame.image.load('images/seiya_left_small.png')
             self.xSurf -= self.rect.width
             self.x = self.x - 1
         elif(key == 'N'):
+            self.sheet = pygame.image.load('images/seiya_back_small.png')
             self.ySurf -= self.rect.height
             self.y = self.y - 1
         elif(key == 'S'):
+            self.sheet = pygame.image.load('images/seiya_front_small.png')
             self.ySurf += self.rect.height
             self.y = self.y + 1
 
@@ -47,4 +51,8 @@ class Agent(pygame.sprite.Sprite):
             self.ySurf -= self.rect.height
             self.y = self.y - 1
 
+
+        self.rect = Rect(0, 0, self.sheet.get_width(), self.sheet.get_height())
+        self.image = pygame.Surface(self.rect.size).convert()
+        self.image.blit(self.sheet, (0, 0), self.rect)
         self.render(surface)
