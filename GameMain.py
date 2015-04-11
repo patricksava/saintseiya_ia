@@ -18,11 +18,11 @@ class GameMain:
 	self.knights = []
 	self.houses = []
 	with open('config/knights.csv') as knights_file:
-    	knights = csv.DictReader(knights_file)
+    	    knights = csv.DictReader(knights_file)
 	    for knight in knights:
 		self.knights.append(knight)
 	with open('config/houses.csv') as houses_file:
-    	houses = csv.DictReader(houses_file)
+    	    houses = csv.DictReader(houses_file)
 	    for house in houses:
 		self.houses.append(house)
 
