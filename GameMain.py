@@ -60,6 +60,23 @@ class GameMain:
             pygame.display.update()
             game.fpsClock.tick(game.FPS)
             time.sleep(0.1)
+        my_font = pygame.font.SysFont("monos pace", 15)
+        end_screen = pygame.display.set_mode((500,500))
+        end_background = pygame.image.load('images/final.jpg')
+        end_background = pygame.transform.scale(end_background, (500, 500))
+        end_screen.blit(end_background,(0,0))
+        label = my_font.render(" CUSTO: " + str(accCost), 1, (255,255,255))
+        label2 = my_font.render(" COMPONENTES", 1, (255,255,255))
+        label3 = my_font.render(" Eric Gristein", 1, (255,255,255))
+        label4 = my_font.render(" Maria Beatriz", 1, (255,255,255))
+        label5 = my_font.render(" Patrick Sava", 1, (255,255,255))
+        end_screen.blit(label2, (5, 5))
+        end_screen.blit(label3, (5, 30))
+        end_screen.blit(label4, (5, 45))
+        end_screen.blit(label5, (5, 60))
+        end_screen.blit(label, (5, 90))
+        pygame.display.flip()
+
 
         print "AccCost: " + str(accCost)
 
