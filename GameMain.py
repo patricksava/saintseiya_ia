@@ -52,7 +52,7 @@ class GameMain:
     def startPathFinding(threadName, game):
         accCost = 0
         returnedValue = Astar.path_search(game.background.mapMatrix, game.background.startCoordenate, game.background.endCoordenate)
-        print returnedValue
+        #print returnedValue
         for step in returnedValue:
             accCost = accCost + game.background.getTerrainCost(game.agent.y, game.agent.x)
             game.background.render(game.screen)

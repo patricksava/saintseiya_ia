@@ -57,7 +57,7 @@ class BackgroundMap:
             terrainImage = MapColors.SANCTUARY
 
         rect = pygame.Rect(0, 0, terrainImage.get_width(), terrainImage.get_height())
-        image = pygame.Surface(rect.size).convert()
+        image = pygame.Surface(rect.size).convert_alpha()
         image.blit(terrainImage, (0,0))
         return image
 
