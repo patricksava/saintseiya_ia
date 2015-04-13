@@ -17,14 +17,14 @@ class GameMain:
         self.background = BackgroundMap()
 	self.knights = []
 	self.houses = []
-	with open('config/knights.csv') as knights_file:
+	'''with open('config/knights.csv') as knights_file:
     	    knights = csv.DictReader(knights_file)
 	    for knight in knights:
 		self.knights.append(knight)
 	with open('config/houses.csv') as houses_file:
     	    houses = csv.DictReader(houses_file)
 	    for house in houses:
-		self.houses.append(house)
+		self.houses.append(house)'''
 
 
     def MainLoop(self):
@@ -51,7 +51,7 @@ class GameMain:
     @staticmethod
     def startPathFinding(threadName, game):
         accCost = 0
-        returnedValue = Astar.path_search(game.background.mapMatrix, game.background.startCoordenate, game.background.endCoordenate)
+        returnedValue = Astar.path_search(game.background, game.background.startCoordenate, game.background.endCoordenate)
         #print returnedValue
         for step in returnedValue:
             accCost = accCost + game.background.getTerrainCost(game.agent.y, game.agent.x)
@@ -59,7 +59,7 @@ class GameMain:
             game.agent.move(step, game.screen)
             pygame.display.update()
             game.fpsClock.tick(game.FPS)
-            time.sleep(0.1)
+            time.sleep(0.001)
         my_font = pygame.font.SysFont("monos pace", 15)
         end_screen = pygame.display.set_mode((500,500))
         end_background = pygame.image.load('images/final.jpg')

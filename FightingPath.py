@@ -10,13 +10,13 @@ class State(object):
     knights_left = utils.get_knights()
 
 
-    def __init__(self, knights_used, house_no):
+    def __init__(self, knights_used, house_no, knights_left):
         self.house_no = house_no
         self.knights_used = knights_used
+	self.knights_left = knights_left
         self.cosmic_power_used = 0
 
-        for knight in self.knights_used:
-            total_cosmic_power += knight['cosmic-power']
+        
 
 
     def __hash__(self):
@@ -39,7 +39,9 @@ class State(object):
 
 
 
-def heuristic( initial_time , current_time):
+def heuristic( initial_time , current_time)
+    for knight in self.knights_used:
+         total_cosmic_power += knight['cosmic-power']
     return initial_time - current_time
 
 

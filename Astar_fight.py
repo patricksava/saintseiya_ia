@@ -1,14 +1,24 @@
 import heapq, math, time
 
-class Astar:
+import utils
+
+class AstarFight:
+
+    class knight:
+        def __init__(self, tuple):
+            self.kn_name = tuple[0]
+            self.cosmic_power = tuple[1]
+            self.lives = tuple[2]
+        def decLife(self):
+            self.lives -= 1
+
 
     class Node:
         def __init__(self, tuple):
-            self.cost = tuple[0]
-            self.position = tuple[1]
+            self.houses_left = tuple[0]
+            self.knights_left = tuple[1] #knights list
             self.parent = tuple[2]
-            self.direction = tuple[3]
-            self.total_cost = tuple[4]
+            
 
         def __str__(self):
             return "Node: ("+ str(self.position[0]) +","+ str(self.position[1]) +") - Cost: "+ str(self.cost)
@@ -70,7 +80,7 @@ class Astar:
             visited[current.node_key()] = current # Sets node as visited
             for nextMove in bg_map.moves[current.position[0]][current.position[1]]: # For each possible move
                 #print "Checking neighbor node: "+ str(nextMove)
-                
+
                 nextMove = Astar.Node(nextMove)
                 nextMove.parent = current
                 nextMove.total_cost = current.total_cost + nextMove.cost
@@ -90,3 +100,4 @@ class Astar:
 
 
 
+__author__ = 'eric'
