@@ -11,45 +11,82 @@ class AstarFight:
             self.lives = tuple[2]
         def decLife(self):
             self.lives -= 1
+        def isDead(self):
+            if not self.lives:
+                return 1
+            return 0
+
+        def __eq__(self, other):
+            return self.name == other.name
 
 
     class Node:
+        id = 0
+
         def __init__(self, tuple):
             self.houses_left = tuple[0]
             self.knights_left = tuple[1] #knights list
             self.parent = tuple[2]
-            
+            self.time_elapsed = tuple[3]
+            self.time_next_house = tuple[4]
+            self.id = id
 
-        def __str__(self):
-            return "Node: ("+ str(self.position[0]) +","+ str(self.position[1]) +") - Cost: "+ str(self.cost)
+            id += 1
+
 
         def node_key(self):
-            return str(self.position[0]) + '-' + str(self.position[1])
+            return self.id
 
-
-        def move_cost(self, matrix, position):
-            terrain = matrix[position[0]][position[1]]
-            if(terrain == '_'):
-                return 200
-            if(terrain == 'P'):
-                return 1
-            if(terrain == 'R'):
-                return 5
-
-            return 1
 
         def to_tuple(self):
-            return [self.cost, self.position, self.parent, self.direction, self.total_cost]
+            return [self.time_next_house, self.houses_left, self.knights_left, self.parent, self.time_elapsed, self.id]
+
+
+        def getNextNode(self):
+            "Gets next possible combination of knights in the next house"
+            combs = utils.get_all_combinations(self.knights_left)
+
+            for comb in combs:
+                #otimizar: fazer um crivo, checar se já está calculando
+                total_power = 0
+                new_knights = self.knights_left
+
+                for knight in comb:
+                    total_power += knight.cosmic_power
+                    pos = 0
+                    for knight_used in new_knights:
+                        if knight_used == knight:
+                            knight_used.decLife()
+
+                            if knight_used.isDead():
+                                del new_knights[pos]
+                        pos += 1
+
+
+                time_fight = self.houses_left[0]/total_power
+
+                new_houses = self.houses_left
+                del new_houses[0]
+
+
+
+                yield Node([new_houses,new_knights, self, self.time_elapsed+time_fight,time_fight])
+
 
     @staticmethod
-    def path_heuristic(goal, current):
-        #Mannhatan Modulus
-        modA = current[0] - goal[0]
-        modB = current[1] - goal[1]
+    def heuristic( node ):
+        houses_left_total_time = 0
+        knights_left_total_power = 0
 
-        cost = (math.fabs(modA) + math.fabs(modB));
+        for house in node.houses_left:
+            houses_left_total_time += house
 
-        return cost
+        for knight in node.knights_left:
+            knights_left_total_power += knights.cosmic_power
+
+        return houses_left_total_time/knights_left_total_power
+
+
 
 
 
