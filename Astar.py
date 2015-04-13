@@ -62,25 +62,23 @@ class Astar:
             return [self.cost, self.position, self.parent, self.direction, self.total_cost]
 
     @staticmethod
-    def path_heuristic(goal, current,next_dir, last_dir):
+    def path_heuristic(goal, current):
         #Mannhatan Modulus
         modA = current[0] - goal[0]
         modB = current[1] - goal[1]
 
         cost = (math.fabs(modA) + math.fabs(modB));
 
-        if next_dir == last_dir:
-            cost*=0.98
         return cost
 
 
 
     @staticmethod
-    def path_search( matrix, start, goal ):
+    def path_search( map, start, goal ):
         startTime = time.time()
+        matrix = map.mapMatrix
         heap = [] #Priority min heap to keep the positions to be expanded
         visited = {} #Nodes that have already been visited
-        last_direction = 'E'
         heapq.heappush(heap, [0, start, None, '',0]) # Includes start point as first node in the heap
 
         while len(heap) > 0:
@@ -101,12 +99,14 @@ class Astar:
                 return listSteps
 
             visited[current.node_key()] = current # Sets node as visited
-            last_direction = current.direction
-            for nextMove in current.possible_moves(matrix): # For each possible move
+            for nextMove in map.moves[current.position[0]][current.position[1]]: # For each possible move
                 #print "Checking neighbor node: "+ str(nextMove)
+                
                 nextMove = Astar.Node(nextMove)
+                nextMove.parent = current
+                nextMove.total_cost = current.total_cost + nextMove.cost
                 key = nextMove.node_key()
-                cost = Astar.path_heuristic(goal, nextMove.position,nextMove.direction,last_direction) + nextMove.cost + nextMove.total_cost # Calculates the cost + heuristic of the new node
+                cost = Astar.path_heuristic(goal, nextMove.position) + nextMove.cost + nextMove.total_cost # Calculates the cost + heuristic of the new node
                 if key in visited and cost < visited[key].cost:
                     #print "Found better path for node " + key
                     del visited[key]

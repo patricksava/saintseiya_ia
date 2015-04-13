@@ -24,6 +24,8 @@ class BackgroundMap:
                     self.endPoint = (j * self.COORD_HEIGHT, i* self.COORD_WIDTH)
                     self.endCoordenate = [j, i]
 
+        self.possible_moves()
+
         self.surface = self.prepareSurface()
 
     def prepareSurface(self):
@@ -76,6 +78,36 @@ class BackgroundMap:
             return 5
 
         return 1
+
+    def possible_moves( self ):
+        lines = len(self.mapMatrix)
+        columns = len(self.mapMatrix[0])
+        self.moves = [[[] for x in range(42)] for x in range(42)]
+        for j in range(0, lines):
+            for i in range(0, columns):
+                # NORTE
+                if(i > 0):
+                    new_position = [i-1, j]
+                    mv_cost = self.getTerrainCost(new_position[1], new_position[0])
+                    self.moves[i][j].append([mv_cost, new_position, None, 'E', 0])
+
+                # SUL
+                if(i < lines-1):
+                    new_position = [i+1, j]
+                    mv_cost = self.getTerrainCost(new_position[1], new_position[0])
+                    self.moves[i][j].append([mv_cost, new_position, None, 'D', 0])
+
+                # ESQUERDA
+                if(j > 0):
+                    new_position = [i, j-1]
+                    mv_cost = self.getTerrainCost(new_position[1], new_position[0])
+                    self.moves[i][j].append([mv_cost, new_position, None, 'N', 0])
+
+                # DIREITA
+                if(j < columns-1):
+                    new_position = [i, j+1]
+                    mv_cost = self.getTerrainCost(new_position[1], new_position[0])
+                    self.moves[i][j].append([mv_cost, new_position, None, 'S', 0])
 
 class MapColors:
     MOUNTAIN = pygame.image.load('images/mountain_path.jpg')
