@@ -12,11 +12,14 @@ class GameMain:
         self.width = width
         self.height = height
         self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("Os Cavaleiros do Zodiaco - Busca (heuristica) pelo Santuario")
         self.FPS = 30
         self.fpsClock = pygame.time.Clock()
         self.background = BackgroundMap()
-	self.knights = []
-	self.houses = []
+        self.knights = []
+        self.houses = []
+        self.semaphore = False
+        self.accCost = 0
 	'''with open('config/knights.csv') as knights_file:
     	    knights = csv.DictReader(knights_file)
 	    for knight in knights:
@@ -31,7 +34,6 @@ class GameMain:
         pygame.key.set_repeat(100, 100)
         self.background.render(self.screen)
         self.LoadSprites()
-        #self.agentSprites.draw(self.screen)
         pygame.display.flip()
         self.agent.render(self.screen)
 
@@ -41,29 +43,39 @@ class GameMain:
                     sys.exit()
                 elif event.type == pygame.KEYUP and event.key == pygame.K_p:
                     thread.start_new_thread ( self.startPathFinding, ("Thread-1", self) )
-                    #if (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT or
-                    #    event.key == pygame.K_UP or event.key == pygame.K_DOWN):
-                    #    self.background.render(self.screen)
-                    #    self.agent.move(event.key, self.screen)
+                    self.semaphore = True #Semaphore UP
+                    while(self.semaphore):
+                        time.sleep(0.3) #Semaphore Lock
 
-            #self.background.debugMatrix()
+                    self.endingScreen(self.accCost) #Show ending screen
 
     @staticmethod
     def startPathFinding(threadName, game):
-        accCost = 0
+        pygame.mixer.music.load("soundtrack/pegasus_fantasy_basic.mp3")
+        pygame.mixer.music.play(-1)
+
         returnedValue = Astar.path_search(game.background, game.background.startCoordenate, game.background.endCoordenate)
         #print returnedValue
         for step in returnedValue:
-            accCost = accCost + game.background.getTerrainCost(game.agent.y, game.agent.x)
+            game.accCost += game.background.getTerrainCost(game.agent.y, game.agent.x)
             game.background.render(game.screen)
             game.agent.move(step, game.screen)
             pygame.display.update()
             game.fpsClock.tick(game.FPS)
-            time.sleep(0.001)
-        my_font = pygame.font.SysFont("monos pace", 15)
-        end_screen = pygame.display.set_mode((500,500))
+            time.sleep(0.1)
+
+        print "AccCost: " + str(game.accCost)
+        game.semaphore = False #Semaphore DOWN
+
+    def LoadSprites(self):
+        self.agent = Agent(self.background.startCoordenate, self.background.startPoint)
+        #self.agentSprites = pygame.sprite.RenderPlain((self.agent))
+
+    def endingScreen(self, accCost):
+        my_font = pygame.font.SysFont("Times New Roman", 15)
+        end_screen = pygame.display.set_mode((600,500))
         end_background = pygame.image.load('images/final.jpg')
-        end_background = pygame.transform.scale(end_background, (500, 500))
+        end_background = pygame.transform.scale(end_background, (600, 500))
         end_screen.blit(end_background,(0,0))
         label = my_font.render(" CUSTO: " + str(accCost), 1, (255,255,255))
         label2 = my_font.render(" COMPONENTES", 1, (255,255,255))
@@ -76,10 +88,3 @@ class GameMain:
         end_screen.blit(label5, (5, 60))
         end_screen.blit(label, (5, 90))
         pygame.display.flip()
-
-
-        print "AccCost: " + str(accCost)
-
-    def LoadSprites(self):
-        self.agent = Agent(self.background.startCoordenate, self.background.startPoint)
-        #self.agentSprites = pygame.sprite.RenderPlain((self.agent))
