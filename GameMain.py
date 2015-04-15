@@ -1,9 +1,12 @@
 import os, sys, csv, time, thread
 import pygame
+import utils
 
 from Agent import Agent
 from BackgroundMap import BackgroundMap
 from Astar import Astar
+from Astar_fight import AstarFight
+
 
 class GameMain:
 
@@ -20,14 +23,6 @@ class GameMain:
         self.houses = []
         self.semaphore = False
         self.accCost = 0
-	'''with open('config/knights.csv') as knights_file:
-    	    knights = csv.DictReader(knights_file)
-	    for knight in knights:
-		self.knights.append(knight)
-	with open('config/houses.csv') as houses_file:
-    	    houses = csv.DictReader(houses_file)
-	    for house in houses:
-		self.houses.append(house)'''
 
 
     def MainLoop(self):
@@ -54,8 +49,24 @@ class GameMain:
         pygame.mixer.music.load("soundtrack/pegasus_fantasy_basic.mp3")
         pygame.mixer.music.play(-1)
 
+        initial_knights = utils.get_knights()
+        knights_list = []
+
+        for kn in initial_knights:
+            knights_list.append(AstarFight.Knight(kn))
+
+        houses_list = utils.get_houses()
+
+        fightingPlan = AstarFight.path_search(knights_list,houses_list)
+        i = 1
+        for knight_comb in fightingPlan:
+            print i
+            for knight_in_comb in knight_comb:
+                print knight_in_comb
+            i+=1
+
         returnedValue = Astar.path_search(game.background, game.background.startCoordenate, game.background.endCoordenate)
-        #print returnedValue
+        print returnedValue
         for step in returnedValue:
             game.accCost += game.background.getTerrainCost(game.agent.y, game.agent.x)
             game.background.render(game.screen)

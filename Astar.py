@@ -52,7 +52,7 @@ class Astar:
 
         while len(heap) > 0:
             current = Astar.Node(heapq.heappop(heap)) # Removes the best node front he expansion frontier
-            #print "\n\nAnalyzing node: "+str(current)
+            ###print "\n\nAnalyzing node: "+str(current)
             if current.position == goal: #Found objective
                 n = current
                 listSteps = []
@@ -63,13 +63,13 @@ class Astar:
 
                 listSteps.reverse() # Reverse steps so that we get the directions from start to goal
                 finishTime = time.time()
-                print "Recovering path: "+str(finishTime - startTimeReversing)
-                print "Total execution time: "+str(finishTime - startTime)
+                ##print "Recovering path: "+str(finishTime - startTimeReversing)
+                ##print "Total execution time: "+str(finishTime - startTime)
                 return listSteps
 
             visited[current.node_key()] = current # Sets node as visited
             for nextMove in bg_map.moves[current.position[0]][current.position[1]]: # For each possible move
-                #print "Checking neighbor node: "+ str(nextMove)
+                ###print "Checking neighbor node: "+ str(nextMove)
                 
                 nextMove = Astar.Node(nextMove)
                 nextMove.parent = current
@@ -77,7 +77,7 @@ class Astar:
                 key = nextMove.node_key()
                 cost = Astar.path_heuristic(goal, nextMove.position) + nextMove.cost + nextMove.total_cost # Calculates the cost + heuristic of the new node
                 if key in visited and cost < visited[key].cost:
-                    #print "Found better path for node " + key
+                    ###print "Found better path for node " + key
                     del visited[key]
                     heapq.heappush(heap, nextMove.to_tuple())
                     continue
@@ -86,7 +86,7 @@ class Astar:
                     nextMove.cost = cost
                     heapq.heappush(heap, nextMove.to_tuple()) # Puts node in the expansion frontier heap
 
-                #print "Next in heap: "+ str(heap[0])
+                ###print "Next in heap: "+ str(heap[0])
 
 
 

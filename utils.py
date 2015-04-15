@@ -3,6 +3,7 @@ __author__ = 'eric'
 import itertools
 import csv
 
+
 def get_all_combinations(knights):
 
     combs = []
@@ -21,7 +22,7 @@ def get_houses():
         houses = []
         houses_diff = []
         for house in houses_gen:
-            houses.append(house)
+            houses.append(eval(house['difficulty']))
 
 	return houses
 
@@ -31,6 +32,8 @@ def get_knights():
     	knights_gen = csv.DictReader(knights_file)
 	knights = []
 	for knight in knights_gen:
-	    knights.append(knight)
+	    knights.append([knight['knight-name'],eval(knight['cosmic-power']),eval(knight['lives'])])
 
         return knights
+
+
