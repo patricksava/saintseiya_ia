@@ -29,6 +29,8 @@ class AstarFight:
     class Node:
         seq_id = 0
 
+        all_knights_combination = None
+
         def __init__(self, tuple):
             self.time_next_house = tuple[0]
             self.houses_left = tuple[1]
@@ -38,6 +40,7 @@ class AstarFight:
             self.id = AstarFight.Node.seq_id
             self.knights_used_before = tuple[5]
             AstarFight.Node.seq_id += 1
+
 
 
         def node_key(self):
@@ -52,14 +55,23 @@ class AstarFight:
 
         def getNextNode(self):
             "Gets next possible combination of knights in the next house"
-            combs = utils.get_all_combinations(self.knights_left)
+
+            # Cache das combinações entre todos os cavaleiros
+            if len(self.knights_left) == 5:
+                if AstarFight.Node.all_knights_combination == None:
+                    combs = utils.get_all_combinations(self.knights_left)
+                else:
+                    combs = AstarFight.Node.all_knights_combination
+            else:
+                combs = utils.get_all_combinations(self.knights_left)
+
 
             for comb in combs:
                 #otimizar: fazer um crivo, checar se já está calculando
                 total_power = 0
-                new_knights = copy.deepcopy(self.knights_left)
+                new_knights = copy.deepcopy(comb)
                 #print ">>>"
-                for knight in comb:
+                for knight in new_knights:
                     total_power += knight.cosmic_power
                     pos = 0
                     for knight_used in new_knights:
@@ -69,6 +81,9 @@ class AstarFight:
 
                             if knight_used.isDead():
                                 del new_knights[pos]
+                            if not new_knights:
+                                break
+                                break
                         pos += 1
 
 
@@ -76,6 +91,7 @@ class AstarFight:
 
                 new_houses = list(self.houses_left)
                 del new_houses[0]
+
 
                 if new_knights:
                     yield AstarFight.Node([time_fight , new_houses , new_knights , self , self.time_elapsed+time_fight, comb])
@@ -101,7 +117,7 @@ class AstarFight:
 
         #print "heurisica informa>",cost
 
-        return cost/(12 - house_count)
+        return cost #/(12 - house_count)
 
 
 
@@ -127,6 +143,7 @@ class AstarFight:
 
                 listSteps.reverse() # Reverse steps so that we get the directions from start to goal
                 finishTime = time.time()
+                
 
                 return listSteps
 
