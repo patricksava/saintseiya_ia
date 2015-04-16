@@ -1,6 +1,6 @@
 #! -*- coding:utf-8 -*-
 
-import heapq, math, time, copy
+import heapq, math, time, copy, sys
 
 import utils
 
@@ -28,12 +28,10 @@ class AstarFight:
 
     class Node:
 
-
-        all_knights_combination = None
+        combinations_cache = {}
 
         def __init__(self, tuple ):
-            self.cost = tuple[0];
-
+            self.cost = tuple[0]
             self.houses_left = tuple[1]
             self.knights_left = tuple[2] #knights list
             self.parent = tuple[3]
@@ -57,25 +55,21 @@ class AstarFight:
             return "houses_left: "+str(len(self.houses_left))+" nodeid:"+str(self.key)
 
         def getNextNode(self):
-            # Cache das combinações entre todos os cavaleiros -> não está tirando vidas
 
-            '''if len(self.knights_left) == 5:
-                if AstarFight.Node.all_knights_combination == None:
-                    AstarFight.Node.all_knights_combination = utils.get_all_combinations(self.knights_left)
-                    combs = AstarFight.Node.all_knights_combination
-                else:
-                    combs = AstarFight.Node.all_knights_combination
+            #crivo para não combinar
+            knights_to_be_combined = ""
+            for kn in self.knights_left:
+                knights_to_be_combined += kn.kn_name + str(kn.lives)
+            if knights_to_be_combined in AstarFight.Node.combinations_cache:
+                combs = AstarFight.Node.combinations_cache[knights_to_be_combined]
             else:
-                combs = utils.get_all_combinations(self.knights_left)'''
-
-
-            combs = utils.get_all_combinations(self.knights_left)
+                combs = utils.get_all_combinations(self.knights_left)
+                AstarFight.Node.combinations_cache[knights_to_be_combined] = combs
 
 
 
+            new_nodes = []
             for comb in combs:
-
-                #otimizar: fazer um crivo, checar se já está calculando
                 total_power = 0
                 new_knights_left = copy.deepcopy(self.knights_left)
                 #print ">>>"
@@ -97,33 +91,23 @@ class AstarFight:
                 del new_houses[0]
 
 
-                if new_knights_left:
-                    new_node = AstarFight.Node([self.cost , new_houses , new_knights_left , self , self.time_elapsed+time_fight, time_fight, comb])
-                    new_node.heuristic_result = AstarFight.heuristic(new_node) + time_fight + self.time_elapsed
-                    yield new_node
+                if new_knights_left or len(new_houses) == 0:
+                    new_node = AstarFight.Node([-1 , new_houses , new_knights_left , self , self.time_elapsed+time_fight, time_fight, comb])
+                    new_node.heuristic_result = AstarFight.heuristic(new_node) + self.time_elapsed + time_fight
+                    new_nodes.append(new_node)
+
+            return new_nodes
 
     @staticmethod
     def heuristic( node ):
         houses_left_total_time = 0
-        knights_left_total_power = 0
-
-        house_count = 0
-        #print "houses>"
         for house in node.houses_left:
-            house_count += 1
-            #print str(house)
             houses_left_total_time += house
-        #print "knights>"
-        for knight in node.knights_left:
-            #print knight.kn_name,knight.cosmic_power,knight.lives
-            knights_left_total_power += knight.lives#*knight.cosmic_power
+
+        cost = houses_left_total_time/3
 
 
-        cost = houses_left_total_time#/knights_left_total_power
-
-        #cost*=len(node.knights_used_before)
-
-        return cost #/(12 - house_count)
+        return cost
 
 
 
@@ -135,12 +119,15 @@ class AstarFight:
         heap = [] #Priority min heap to keep the positions to be expanded
         visited = {} #Nodes that have already been visited
         heapq.heappush(heap, [ 0, houses , knights, None, 0, 0, []]) # Includes start point as first node in the heap
-
+        house_seen = 12
         while len(heap) > 0:
 
             current = AstarFight.Node(heapq.heappop(heap)) # Removes the best node front he expansion frontier
-            if len(current.houses_left) <= 2:
+
+            if len(current.houses_left) < house_seen:
                 print str(current)
+                house_seen = len(current.houses_left)
+
             if not current.houses_left: #Found objective
 
                 n = current
@@ -159,14 +146,15 @@ class AstarFight:
             visited[current.node_key()] = current # Sets node as visited
             for nextMove in current.getNextNode(): # For each possible move
                 key = nextMove.node_key()
-                if key in visited and nextMove.cost < visited[key].cost:
-
-                    del visited[key]
-                    if nextMove.knights_left:
+                if key in visited:
+                    #print "ja visitei:"+ str(nextMove),str(nextMove.parent)
+                    if nextMove.cost < visited[key].cost:
+                        #print "custo melhorou:",str(nextMove)
+                        del visited[key]
                         heapq.heappush(heap, nextMove.to_tuple())
-                    continue
 
-                if key not in visited:
+                    continue
+                else: #key not in visited:
                     heapq.heappush(heap, nextMove.to_tuple()) # Puts node in the expansion frontier heap
 
 

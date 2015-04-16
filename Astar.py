@@ -75,7 +75,7 @@ class Astar:
                 nextMove.parent = current
                 nextMove.total_cost = current.total_cost + nextMove.cost
                 key = nextMove.node_key()
-                cost = Astar.path_heuristic(goal, nextMove.position) + nextMove.cost + nextMove.total_cost # Calculates the cost + heuristic of the new node
+                cost = Astar.path_heuristic(goal, nextMove.position) + nextMove.total_cost # Calculates the cost + heuristic of the new node
                 if key in visited and cost < visited[key].cost:
                     ###print "Found better path for node " + key
                     del visited[key]
