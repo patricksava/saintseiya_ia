@@ -48,53 +48,53 @@ class AstarFight:
 
 
         def to_tuple(self):
-            return [self.time_next_house, self.houses_left, self.knights_left, self.parent, self.time_elapsed, self.knights_used_before, self.id]
+            return [self.time_next_house, self.houses_left, self.knights_left, self.parent, self.time_elapsed, self.knights_used_before]
 
         def __str__(self):
             return "houses_left: "+str(len(self.houses_left))+" nodeid:"+str(self.id)
 
         def getNextNode(self):
-            "Gets next possible combination of knights in the next house"
+            # Cache das combinações entre todos os cavaleiros -> não está tirando vidas
 
-            # Cache das combinações entre todos os cavaleiros
-            if len(self.knights_left) == 5:
+            '''if len(self.knights_left) == 5:
                 if AstarFight.Node.all_knights_combination == None:
-                    combs = utils.get_all_combinations(self.knights_left)
+                    AstarFight.Node.all_knights_combination = utils.get_all_combinations(self.knights_left)
+                    combs = AstarFight.Node.all_knights_combination
                 else:
                     combs = AstarFight.Node.all_knights_combination
             else:
-                combs = utils.get_all_combinations(self.knights_left)
+                combs = utils.get_all_combinations(self.knights_left)'''
 
+
+            combs = utils.get_all_combinations(self.knights_left)
+
+            if len(combs) > 10:
+                print "combs:", len(combs)
 
             for comb in combs:
                 #otimizar: fazer um crivo, checar se já está calculando
                 total_power = 0
                 new_knights = copy.deepcopy(comb)
                 #print ">>>"
+                pos = 0
                 for knight in new_knights:
                     total_power += knight.cosmic_power
-                    pos = 0
-                    for knight_used in new_knights:
-                        if knight_used == knight:
 
-                            knight_used.decLife()
+                    knight.decLife()
+                    if knight.isDead():
+                        del new_knights[pos]
 
-                            if knight_used.isDead():
-                                del new_knights[pos]
-                            if not new_knights:
-                                break
-                                break
-                        pos += 1
-
+                    pos += 1
 
                 time_fight = self.houses_left[0]/total_power
 
-                new_houses = list(self.houses_left)
+                new_houses = copy.deepcopy(self.houses_left)
                 del new_houses[0]
 
 
                 if new_knights:
-                    yield AstarFight.Node([time_fight , new_houses , new_knights , self , self.time_elapsed+time_fight, comb])
+
+                    yield AstarFight.Node([time_fight , new_houses , new_knights , self , self.time_elapsed+time_fight, new_knights,self.id])
 
 
     @staticmethod
@@ -128,13 +128,15 @@ class AstarFight:
         startTime = time.time()
         heap = [] #Priority min heap to keep the positions to be expanded
         visited = {} #Nodes that have already been visited
-        heapq.heappush(heap, [0, houses , knights,None, 0, []]) # Includes start point as first node in the heap
+        heapq.heappush(heap, [0, houses , knights, None, 0, []]) # Includes start point as first node in the heap
 
         while len(heap) > 0:
+
             current = AstarFight.Node(heapq.heappop(heap)) # Removes the best node front he expansion frontier
-            print "\n\n"+str(current)
+            #print "\n\n"+str(current)
             if not current.houses_left: #Found objective
                 n = current
+                #print str(current)
                 listSteps = []
                 startTimeReversing = time.time()
                 while n.parent != None: # Create a list of steps from last to first
@@ -143,8 +145,8 @@ class AstarFight:
 
                 listSteps.reverse() # Reverse steps so that we get the directions from start to goal
                 finishTime = time.time()
-                
 
+                print "tempo gasto:",current.time_elapsed
                 return listSteps
 
             visited[current.id] = current # Sets node as visited
@@ -161,6 +163,6 @@ class AstarFight:
                 if key not in visited:
                     heapq.heappush(heap, nextMove.to_tuple()) # Puts node in the expansion frontier heap
 
-
+        print "heap ficou vazio...caramba"
 
 __author__ = 'eric, mbvaz, psava'

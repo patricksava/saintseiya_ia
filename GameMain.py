@@ -65,6 +65,7 @@ class GameMain:
                 print knight_in_comb
             i+=1
 
+
         returnedValue = Astar.path_search(game.background, game.background.startCoordenate, game.background.endCoordenate)
         print returnedValue
         for step in returnedValue:
