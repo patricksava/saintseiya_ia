@@ -63,13 +63,13 @@ class Astar:
 
                 listSteps.reverse() # Reverse steps so that we get the directions from start to goal
                 finishTime = time.time()
-                ##print "Recovering path: "+str(finishTime - startTimeReversing)
-                ##print "Total execution time: "+str(finishTime - startTime)
+                #print "Recovering path: "+str(finishTime - startTimeReversing)
+                #print "Total execution time: "+str(finishTime - startTime)
                 return listSteps
 
             visited[current.node_key()] = current # Sets node as visited
             for nextMove in bg_map.moves[current.position[0]][current.position[1]]: # For each possible move
-                ###print "Checking neighbor node: "+ str(nextMove)
+                #print "Checking neighbor node: "+ str(nextMove)
                 
                 nextMove = Astar.Node(nextMove)
                 nextMove.parent = current
