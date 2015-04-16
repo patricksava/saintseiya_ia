@@ -32,7 +32,7 @@ class AstarFight:
         all_knights_combination = None
 
         def __init__(self, tuple ):
-            self.heuristic_result = tuple[0];
+            self.cost = tuple[0];
 
             self.houses_left = tuple[1]
             self.knights_left = tuple[2] #knights list
@@ -97,8 +97,8 @@ class AstarFight:
 
 
                 if new_knights_left:
-                    new_node = AstarFight.Node([self.heuristic_result , new_houses , new_knights_left , self , self.time_elapsed+time_fight, time_fight, comb,self.id])
-                    new_node.heuristic_result = AstarFight.heuristic(new_node)
+                    new_node = AstarFight.Node([self.cost , new_houses , new_knights_left , self , self.time_elapsed+time_fight, time_fight, comb,self.id])
+                    new_node.heuristic_result = AstarFight.heuristic(new_node)# + time_fight + self.time_elapsed)#/(12 - len(new_houses))
                     yield new_node
 
     @staticmethod
@@ -115,16 +115,14 @@ class AstarFight:
         #print "knights>"
         for knight in node.knights_left:
             #print knight.kn_name,knight.cosmic_power,knight.lives
-            knights_left_total_power += knight.lives*knight.cosmic_power
+            knights_left_total_power += knight.lives#*knight.cosmic_power
 
 
         cost = houses_left_total_time/knights_left_total_power
 
         #cost*=len(node.knights_used_before)
 
-        #print "heurisica informa>",cost
-
-        return cost /(12 - house_count)
+        return cost #/(12 - house_count)
 
 
 
@@ -144,7 +142,6 @@ class AstarFight:
             if not current.houses_left: #Found objective
 
                 n = current
-                print str(current)
                 listSteps = []
                 startTimeReversing = time.time()
                 while n.parent != None: # Create a list of steps from last to first
