@@ -31,14 +31,16 @@ class AstarFight:
 
         all_knights_combination = None
 
-        def __init__(self, tuple):
-            self.time_next_house = tuple[0]
+        def __init__(self, tuple ):
+            self.heuristic_result = tuple[0];
+
             self.houses_left = tuple[1]
             self.knights_left = tuple[2] #knights list
             self.parent = tuple[3]
             self.time_elapsed = tuple[4]
+            self.time_from_house_before = tuple[5]
             self.id = AstarFight.Node.seq_id
-            self.knights_used_before = tuple[5]
+            self.knights_used_before = tuple[6]
             AstarFight.Node.seq_id += 1
 
 
@@ -48,7 +50,7 @@ class AstarFight:
 
 
         def to_tuple(self):
-            return [self.time_next_house, self.houses_left, self.knights_left, self.parent, self.time_elapsed, self.knights_used_before]
+            return [self.heuristic_result, self.houses_left, self.knights_left, self.parent, self.time_elapsed, self.time_from_house_before, self.knights_used_before]
 
         def __str__(self):
             return "houses_left: "+str(len(self.houses_left))+" nodeid:"+str(self.id)
@@ -68,23 +70,25 @@ class AstarFight:
 
             combs = utils.get_all_combinations(self.knights_left)
 
-            if len(combs) > 10:
-                print "combs:", len(combs)
+
 
             for comb in combs:
+
                 #otimizar: fazer um crivo, checar se já está calculando
                 total_power = 0
-                new_knights = copy.deepcopy(comb)
+                new_knights_left = copy.deepcopy(self.knights_left)
                 #print ">>>"
-                pos = 0
-                for knight in new_knights:
+
+                for knight in comb:
+                    #print str(knight)
                     total_power += knight.cosmic_power
-
-                    knight.decLife()
-                    if knight.isDead():
-                        del new_knights[pos]
-
-                    pos += 1
+                    pos = 0
+                    for kn in new_knights_left:
+                        if knight == kn:
+                            kn.decLife()
+                            if kn.isDead():
+                                 del new_knights_left[pos]
+                        pos += 1
 
                 time_fight = self.houses_left[0]/total_power
 
@@ -92,15 +96,16 @@ class AstarFight:
                 del new_houses[0]
 
 
-                if new_knights:
-
-                    yield AstarFight.Node([time_fight , new_houses , new_knights , self , self.time_elapsed+time_fight, new_knights,self.id])
-
+                if new_knights_left:
+                    new_node = AstarFight.Node([self.heuristic_result , new_houses , new_knights_left , self , self.time_elapsed+time_fight, time_fight, comb,self.id])
+                    new_node.heuristic_result = AstarFight.heuristic(new_node)
+                    yield new_node
 
     @staticmethod
     def heuristic( node ):
         houses_left_total_time = 0
         knights_left_total_power = 0
+
         house_count = 0
         #print "houses>"
         for house in node.houses_left:
@@ -115,9 +120,11 @@ class AstarFight:
 
         cost = houses_left_total_time/knights_left_total_power
 
+        #cost*=len(node.knights_used_before)
+
         #print "heurisica informa>",cost
 
-        return cost #/(12 - house_count)
+        return cost /(12 - house_count)
 
 
 
@@ -128,15 +135,16 @@ class AstarFight:
         startTime = time.time()
         heap = [] #Priority min heap to keep the positions to be expanded
         visited = {} #Nodes that have already been visited
-        heapq.heappush(heap, [0, houses , knights, None, 0, []]) # Includes start point as first node in the heap
+        heapq.heappush(heap, [ 0, houses , knights, None, 0, 0, []]) # Includes start point as first node in the heap
 
         while len(heap) > 0:
 
             current = AstarFight.Node(heapq.heappop(heap)) # Removes the best node front he expansion frontier
             #print "\n\n"+str(current)
             if not current.houses_left: #Found objective
+
                 n = current
-                #print str(current)
+                print str(current)
                 listSteps = []
                 startTimeReversing = time.time()
                 while n.parent != None: # Create a list of steps from last to first
@@ -152,8 +160,7 @@ class AstarFight:
             visited[current.id] = current # Sets node as visited
             for nextMove in current.getNextNode(): # For each possible move
                 key = nextMove.id
-                cost = AstarFight.heuristic(nextMove)
-                if key in visited and cost < visited[key].time_next_house:
+                if key in visited and nextMove.heuristic_result < visited[key].heuristic_result:
 
                     del visited[key]
                     if nextMove.knights_left:
