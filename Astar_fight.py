@@ -27,7 +27,7 @@ class AstarFight:
 
 
     class Node:
-        seq_id = 0
+
 
         all_knights_combination = None
 
@@ -39,21 +39,22 @@ class AstarFight:
             self.parent = tuple[3]
             self.time_elapsed = tuple[4]
             self.time_from_house_before = tuple[5]
-            self.id = AstarFight.Node.seq_id
             self.knights_used_before = tuple[6]
-            AstarFight.Node.seq_id += 1
+            self.key = str(len(self.houses_left))
+            for knight in self.knights_left:
+                self.key = self.key+knight.kn_name+str(knight.lives)
 
 
 
         def node_key(self):
-            return self.id
+            return self.key
 
 
         def to_tuple(self):
             return [self.heuristic_result, self.houses_left, self.knights_left, self.parent, self.time_elapsed, self.time_from_house_before, self.knights_used_before]
 
         def __str__(self):
-            return "houses_left: "+str(len(self.houses_left))+" nodeid:"+str(self.id)
+            return "houses_left: "+str(len(self.houses_left))+" nodeid:"+str(self.key)
 
         def getNextNode(self):
             # Cache das combinações entre todos os cavaleiros -> não está tirando vidas
@@ -97,8 +98,8 @@ class AstarFight:
 
 
                 if new_knights_left:
-                    new_node = AstarFight.Node([self.cost , new_houses , new_knights_left , self , self.time_elapsed+time_fight, time_fight, comb,self.id])
-                    new_node.heuristic_result = AstarFight.heuristic(new_node)# + time_fight + self.time_elapsed)#/(12 - len(new_houses))
+                    new_node = AstarFight.Node([self.cost , new_houses , new_knights_left , self , self.time_elapsed+time_fight, time_fight, comb])
+                    new_node.heuristic_result = AstarFight.heuristic(new_node) + time_fight + self.time_elapsed
                     yield new_node
 
     @staticmethod
@@ -118,7 +119,7 @@ class AstarFight:
             knights_left_total_power += knight.lives#*knight.cosmic_power
 
 
-        cost = houses_left_total_time/knights_left_total_power
+        cost = houses_left_total_time#/knights_left_total_power
 
         #cost*=len(node.knights_used_before)
 
@@ -138,7 +139,8 @@ class AstarFight:
         while len(heap) > 0:
 
             current = AstarFight.Node(heapq.heappop(heap)) # Removes the best node front he expansion frontier
-            #print "\n\n"+str(current)
+            if len(current.houses_left) <= 2:
+                print str(current)
             if not current.houses_left: #Found objective
 
                 n = current
@@ -154,10 +156,10 @@ class AstarFight:
                 print "tempo gasto:",current.time_elapsed
                 return listSteps
 
-            visited[current.id] = current # Sets node as visited
+            visited[current.node_key()] = current # Sets node as visited
             for nextMove in current.getNextNode(): # For each possible move
-                key = nextMove.id
-                if key in visited and nextMove.heuristic_result < visited[key].heuristic_result:
+                key = nextMove.node_key()
+                if key in visited and nextMove.cost < visited[key].cost:
 
                     del visited[key]
                     if nextMove.knights_left:
@@ -167,6 +169,5 @@ class AstarFight:
                 if key not in visited:
                     heapq.heappush(heap, nextMove.to_tuple()) # Puts node in the expansion frontier heap
 
-        print "heap ficou vazio...caramba"
 
 __author__ = 'eric, mbvaz, psava'
