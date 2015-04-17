@@ -23,8 +23,10 @@ def get_houses():
         houses_diff = []
         for house in houses_gen:
             houses.append(eval(house['difficulty']))
-
+        houses.sort(None, None, True)
+        #print houses
 	return houses
+
 
 
 def get_knights():

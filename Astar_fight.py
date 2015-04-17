@@ -55,6 +55,23 @@ class AstarFight:
         def __str__(self):
             return "houses_left: "+str(len(self.houses_left))+" nodeid:"+str(self.key)
 
+        def tooMuchLivesLeft(self):
+            livesLeft = 0
+            for knight in self.knights_left:
+                if(len(self.houses_left) < knight.lives and knight.lives > 0):
+                    return True
+
+            return False
+
+        def tooFewLivesLeft(self):
+            livesLeft = 0
+            for knight in self.knights_left:
+                livesLeft += knight.lives
+
+            if(len(self.houses_left) > livesLeft):
+                return True
+            return False
+
         def getNextNode(self):
 
             #crivo para não combinar
@@ -95,7 +112,7 @@ class AstarFight:
                 if new_knights_left or len(new_houses) == 0:
                     new_node = AstarFight.Node([-1 , new_houses , new_knights_left , self , self.time_elapsed+time_fight, time_fight, comb])
                     if not new_node.node_key() in AstarFight.Node.nodes_visited:
-                        new_node.heuristic_result = AstarFight.heuristic(new_node) + time_fight +self.time_elapsed #*(12 - len(new_houses))
+                        new_node.heuristic_result = AstarFight.heuristic(new_node) + time_fight # +self.time_elapsed #*(12 - len(new_houses))
                         new_nodes.append(new_node)
 
             return new_nodes
@@ -103,14 +120,17 @@ class AstarFight:
     @staticmethod
     def heuristic( node ):
         houses_left_total_time = 0
+        total_cosmic_power = 0
         for house in node.houses_left:
             houses_left_total_time += house
-        knights_left_lives = 0
 
+        for knight in node.knights_left:
+            total_cosmic_power += knight.cosmic_power*knight.lives
 
+        if(total_cosmic_power == 0):
+            return 0
 
-        cost = houses_left_total_time/6.5
-
+        cost = houses_left_total_time/total_cosmic_power
 
         return cost
 
@@ -123,20 +143,23 @@ class AstarFight:
         startTime = time.time()
         heap = [] #Priority min heap to keep the positions to be expanded
         visited = {} #Nodes that have already been visited
-        heapq.heappush(heap, [ 0, houses , knights, None, 0, 0, []]) # Includes start point as first node in the heap
+        heapq.heappush(heap, [0, houses, knights, None, 0, 0, []]) # Includes start point as first node in the heap
         house_seen = 12
         while len(heap) > 0:
 
             current = AstarFight.Node(heapq.heappop(heap)) # Removes the best node front he expansion frontier
+            #if len(current.houses_left) < 9:
+            #    print str(current)
+            #    house_seen = len(current.houses_left)
 
-            if len(current.houses_left) < house_seen:
-                print str(current)
-                house_seen = len(current.houses_left)
+            AstarFight.Node.nodes_visited[current.node_key()] = current # Sets node as visited
+            if(len(current.houses_left) <= 2):
+                print str(current) + "Time elapsed: "+ str(current.time_elapsed)
 
-            if not current.houses_left: #Found objective
-
+            if(len(current.houses_left) == 0):
                 n = current
                 listSteps = []
+                timePassed = n.time_elapsed
                 startTimeReversing = time.time()
                 while n.parent != None: # Create a list of steps from last to first
                     listSteps.append(n.knights_used_before)
@@ -146,23 +169,25 @@ class AstarFight:
                 finishTime = time.time()
 
                 print "Total execution time: "+str(finishTime - startTime)
-                print "tempo gasto:",current.time_elapsed
+                print "tempo gasto:"+str(timePassed)
                 return listSteps
 
-            AstarFight.Node.nodes_visited[current.node_key()] = current # Sets node as visited
             for nextMove in current.getNextNode(): # For each possible move
                 key = nextMove.node_key()
                 if key in AstarFight.Node.nodes_visited:
-                    continue
                     #print "ja visitei:"+ str(nextMove),str(nextMove.parent)
                     if nextMove.cost < AstarFight.Node.nodes_visited[key].cost:
                         #print "custo melhorou:",str(nextMove)
                         del visited[key]
                         heapq.heappush(heap, nextMove.to_tuple())
-
+                    continue
 
                 else: #key not in visited:
-                    heapq.heappush(heap, nextMove.to_tuple()) # Puts node in the expansion frontier heap
+                    if(not nextMove.tooMuchLivesLeft() and not nextMove.tooFewLivesLeft()):
+                        heapq.heappush(heap, nextMove.to_tuple()) # Puts node in the expansion frontier heap
+
+
+
 
 
 __author__ = 'eric, mbvaz, psava'
