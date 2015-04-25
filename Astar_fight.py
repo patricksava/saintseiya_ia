@@ -148,13 +148,8 @@ class AstarFight:
         while len(heap) > 0:
 
             current = AstarFight.Node(heapq.heappop(heap)) # Removes the best node front he expansion frontier
-            #if len(current.houses_left) < 9:
-            #    print str(current)
-            #    house_seen = len(current.houses_left)
 
             AstarFight.Node.nodes_visited[current.node_key()] = current # Sets node as visited
-            if(len(current.houses_left) <= 2):
-                print str(current) + "Time elapsed: "+ str(current.time_elapsed)
 
             if(len(current.houses_left) == 0):
                 n = current
@@ -170,7 +165,7 @@ class AstarFight:
 
                 print "Total execution time: "+str(finishTime - startTime)
                 print "tempo gasto:"+str(timePassed)
-                return listSteps
+                return (listSteps, timePassed)
 
             for nextMove in current.getNextNode(): # For each possible move
                 key = nextMove.node_key()

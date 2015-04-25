@@ -1,4 +1,4 @@
-import os, sys, csv, time, thread
+import os, sys, time, thread
 import pygame
 import utils
 
@@ -23,6 +23,8 @@ class GameMain:
         self.houses = []
         self.semaphore = False
         self.accCost = 0
+        self.battleCost = 0
+        self.fightingPlan = None
 
 
     def MainLoop(self):
@@ -37,35 +39,46 @@ class GameMain:
                 if event.type == pygame.QUIT:
                     sys.exit()
                 elif event.type == pygame.KEYUP and event.key == pygame.K_p:
+                    print "Trigger activated!"
                     thread.start_new_thread ( self.startPathFinding, ("Thread-1", self) )
                     self.semaphore = True #Semaphore UP
                     while(self.semaphore):
                         time.sleep(0.3) #Semaphore Lock
 
-                    self.endingScreen(self.accCost) #Show ending screen
+                    self.endingScreen(self.accCost, self.battleCost) #Show ending screen
 
     @staticmethod
     def startPathFinding(threadName, game):
-        pygame.mixer.music.load("soundtrack/pegasus_fantasy_basic.mp3")
+        pygame.mixer.music.load(os.path.normcase("soundtrack/pegasus_fantasy_basic.mp3"))
         pygame.mixer.music.play(-1)
 
         initial_knights = utils.get_knights()
         knights_list = []
-
+        weaker_knight = ['', 9999999, 0]
         for kn in initial_knights:
+            if(kn[1] < weaker_knight[1]):
+                weaker_knight = kn
             knights_list.append(AstarFight.Knight(kn))
+
+        for knight in knights_list:
+            if(knight.kn_name == weaker_knight[0]):
+                knight.lives = knight.lives - 1 #reduzindo uma vida do mais fraco apenas para o a*
 
         houses_list = utils.get_houses()
 
+        print "Deciding battle plan"
         fightingPlan = AstarFight.path_search(knights_list,houses_list)
         i = 1
-        for knight_comb in fightingPlan:
+        for knight_comb in fightingPlan[0]:
             print i
             for knight_in_comb in knight_comb:
                 print knight_in_comb
             i+=1
 
+        game.battleCost = fightingPlan[1]
+        game.fightingPlan = fightingPlan[0]
 
+        print "Deciding path to traverse"
         returnedValue = Astar.path_search(game.background, game.background.startCoordenate, game.background.endCoordenate)
         print returnedValue
         for step in returnedValue:
@@ -77,26 +90,33 @@ class GameMain:
             time.sleep(0.1)
 
         print "AccCost: " + str(game.accCost)
+        print "BattleCost: " + str(fightingPlan[1])
         game.semaphore = False #Semaphore DOWN
 
     def LoadSprites(self):
         self.agent = Agent(self.background.startCoordenate, self.background.startPoint)
-        #self.agentSprites = pygame.sprite.RenderPlain((self.agent))
 
-    def endingScreen(self, accCost):
+    def endingScreen(self, accCost, battleTime):
         my_font = pygame.font.SysFont("Times New Roman", 15)
-        end_screen = pygame.display.set_mode((600,500))
-        end_background = pygame.image.load('images/final.jpg')
+        end_screen = pygame.display.set_mode((800,500))
+        end_background = pygame.image.load(os.path.normcase('images/final.jpg'))
         end_background = pygame.transform.scale(end_background, (600, 500))
-        end_screen.blit(end_background,(0,0))
-        label = my_font.render(" CUSTO: " + str(accCost), 1, (255,255,255))
+        end_screen.blit(end_background,(200,0))
+        labelTraverse = my_font.render(" Custo caminho: " + str(accCost), 1, (255,255,255))
+        labelBattle = my_font.render(" Custo batalha: " + "%.2f" %battleTime, 1, (255,255,255))
+        labelTotal = my_font.render(" Custo total: " + "%.2f" %(battleTime + accCost), 1, (255,255,255))
+
         label2 = my_font.render(" COMPONENTES", 1, (255,255,255))
-        label3 = my_font.render(" Eric Gristein", 1, (255,255,255))
-        label4 = my_font.render(" Maria Beatriz", 1, (255,255,255))
+        label3 = my_font.render(" Eric Grinstein", 1, (255,255,255))
+        label4 = my_font.render(" Maria Beatriz Vaz", 1, (255,255,255))
         label5 = my_font.render(" Patrick Sava", 1, (255,255,255))
+
         end_screen.blit(label2, (5, 5))
         end_screen.blit(label3, (5, 30))
         end_screen.blit(label4, (5, 45))
         end_screen.blit(label5, (5, 60))
-        end_screen.blit(label, (5, 90))
+        end_screen.blit(labelTraverse, (5, 90))
+        end_screen.blit(labelBattle, (5, 105))
+        end_screen.blit(labelTotal, (5, 135))
+
         pygame.display.flip()

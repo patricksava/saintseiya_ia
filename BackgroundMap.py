@@ -1,6 +1,6 @@
 __author__ = 'psava'
 
-import pygame
+import pygame, os
 
 class BackgroundMap:
 
@@ -11,7 +11,7 @@ class BackgroundMap:
     COORD_WIDTH  = 15
 
     def __init__(self):
-        mapfile = open('config/map.txt', 'r')
+        mapfile = open(os.path.normcase('config/map.txt'), 'r')
         self.mapMatrix = [[0 for x in range(42)] for x in range(42)]
         for i in range(42):
             line = mapfile.readline()
@@ -110,9 +110,9 @@ class BackgroundMap:
                     self.moves[i][j].append([mv_cost, new_position, None, 'S', 0])
 
 class MapColors:
-    MOUNTAIN = pygame.image.load('images/mountain_path.jpg')
-    ROCKY = pygame.image.load('images/rock_path.jpg')
-    PLAIN = pygame.image.load('images/plain_path.jpg')
-    START = pygame.image.load('images/start_point.jpg')#(255, 0, 0)
-    OBJECTIVE = pygame.image.load('images/end_point.jpg')#(0, 255, 0)
-    SANCTUARY = pygame.image.load('images/sanctuary.jpg')#(255, 255, 0)
+    MOUNTAIN = pygame.image.load(os.path.normcase('images/mountain_path.jpg'))
+    ROCKY = pygame.image.load(os.path.normcase('images/rock_path.jpg'))
+    PLAIN = pygame.image.load(os.path.normcase('images/plain_path.jpg'))
+    START = pygame.image.load(os.path.normcase('images/start_point.jpg'))#(255, 0, 0)
+    OBJECTIVE = pygame.image.load(os.path.normcase('images/end_point.jpg'))#(0, 255, 0)
+    SANCTUARY = pygame.image.load(os.path.normcase('images/sanctuary.jpg'))#(255, 255, 0)

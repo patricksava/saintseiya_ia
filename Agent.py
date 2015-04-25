@@ -9,10 +9,10 @@ class Agent(pygame.sprite.Sprite):
 
     def __init__(self, coord, surfcoord):
         pygame.sprite.Sprite.__init__(self)
-        self.SEIYA_FRONT = pygame.image.load('images/seiya_front_small.png').convert_alpha()
-        self.SEIYA_BACK = pygame.image.load('images/seiya_back_small.png').convert_alpha()
-        self.SEIYA_LEFT = pygame.image.load('images/seiya_left_small.png').convert_alpha()
-        self.SEIYA_RIGHT = pygame.image.load('images/seiya_right_small.png').convert_alpha()
+        self.SEIYA_FRONT = pygame.image.load(os.path.normcase('images/seiya_front_small.png')).convert_alpha()
+        self.SEIYA_BACK = pygame.image.load(os.path.normcase('images/seiya_back_small.png')).convert_alpha()
+        self.SEIYA_LEFT = pygame.image.load(os.path.normcase('images/seiya_left_small.png')).convert_alpha()
+        self.SEIYA_RIGHT = pygame.image.load(os.path.normcase('images/seiya_right_small.png')).convert_alpha()
         self.x = coord[0]
         self.y = coord[1]
         self.xSurf = surfcoord[0]
